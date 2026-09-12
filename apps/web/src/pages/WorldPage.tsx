@@ -1,166 +1,216 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCharacter } from '../contexts/CharacterContext';
-import { LogOut, Map as MapIcon, Coins, Sparkles, BookOpen, Dumbbell, Brain, Leaf, Eye, Loader2, Flame } from 'lucide-react';
+import { Map as MapIcon, Coins, Sparkles, BookOpen, Dumbbell, Brain, Leaf, Eye, Loader2, Flame, Shield, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const ATTRIBUTE_CONFIG = [
-  { key: 'intelligence', label: 'Intelligence', icon: Brain,    color: 'text-purple-400', bar: 'bg-purple-500', border: 'border-purple-500/20', bg: 'bg-purple-500/10' },
-  { key: 'strength',     label: 'Strength',     icon: Dumbbell, color: 'text-red-400',    bar: 'bg-red-500',    border: 'border-red-500/20',    bg: 'bg-red-500/10' },
-  { key: 'wisdom',       label: 'Wisdom',       icon: BookOpen, color: 'text-blue-400',   bar: 'bg-blue-500',   border: 'border-blue-500/20',   bg: 'bg-blue-500/10' },
-  { key: 'focus',        label: 'Focus',        icon: Eye,      color: 'text-emerald-400',bar: 'bg-emerald-500',border: 'border-emerald-500/20', bg: 'bg-emerald-500/10' },
-  { key: 'vitality',     label: 'Vitality',     icon: Leaf,     color: 'text-amber-400',  bar: 'bg-amber-500',  border: 'border-amber-500/20',  bg: 'bg-amber-500/10' },
+const PINS = [
+  {
+    id: 'castle',
+    label: 'The Castle',
+    type: 'level',
+    x: '50%',
+    y: '25%',
+    icon: Shield,
+    color: 'text-amber-400',
+    border: 'border-amber-400/50',
+    bg: 'bg-amber-400/10',
+  },
+  {
+    id: 'observatory',
+    label: 'Observatory',
+    type: 'attribute',
+    attribute: 'focus',
+    x: '82%',
+    y: '28%',
+    icon: Eye,
+    color: 'text-emerald-400',
+    border: 'border-emerald-400/50',
+    bg: 'bg-emerald-400/10',
+  },
+  {
+    id: 'forest',
+    label: 'Ancient Forest',
+    type: 'attribute',
+    attribute: 'wisdom',
+    x: '18%',
+    y: '45%',
+    icon: Leaf,
+    color: 'text-green-400',
+    border: 'border-green-400/50',
+    bg: 'bg-green-400/10',
+  },
+  {
+    id: 'training',
+    label: 'Training Grounds',
+    type: 'attribute',
+    attribute: 'strength',
+    x: '75%',
+    y: '58%',
+    icon: Dumbbell,
+    color: 'text-red-400',
+    border: 'border-red-400/50',
+    bg: 'bg-red-400/10',
+  },
+  {
+    id: 'library',
+    label: 'Grand Library',
+    type: 'attribute',
+    attribute: 'intelligence',
+    x: '35%',
+    y: '65%',
+    icon: Brain,
+    color: 'text-purple-400',
+    border: 'border-purple-400/50',
+    bg: 'bg-purple-400/10',
+  },
+  {
+    id: 'marketplace',
+    label: 'Marketplace',
+    type: 'gold',
+    x: '52%',
+    y: '85%',
+    icon: Coins,
+    color: 'text-yellow-400',
+    border: 'border-yellow-400/50',
+    bg: 'bg-yellow-400/10',
+  },
 ];
 
 const WorldPage = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { character, isLoading, currentLevelXp, xpRequired, xpPercent, streakLabel, streakMultiplier } = useCharacter();
   const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
+  const [hoveredPin, setHoveredPin] = useState<string | null>(null);
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-20 relative z-10">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+      <div className="flex h-[calc(100vh-100px)] items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
       </div>
     );
   }
 
-  const maxAttr = Math.max(
-    1,
-    ...ATTRIBUTE_CONFIG.map(a => (character?.attributes as any)?.[a.key] ?? 0)
-  );
+  const renderPinContent = (pin: typeof PINS[0]) => {
+    if (pin.type === 'level') {
+      return (
+        <div className="flex flex-col items-center">
+          <span className="text-xs uppercase tracking-widest text-slate-300 font-semibold mb-1">Level {character?.level || 1}</span>
+          <div className="w-24 h-1.5 bg-slate-900/60 rounded-full overflow-hidden mb-1">
+            <div className="h-full bg-amber-400" style={{ width: `${xpPercent}%` }} />
+          </div>
+          <span className="text-[10px] text-slate-400">{currentLevelXp} / {xpRequired} XP</span>
+        </div>
+      );
+    }
+    if (pin.type === 'attribute') {
+      const val = character?.attributes?.[pin.attribute as keyof typeof character.attributes] || 0;
+      return (
+        <div className="flex items-center gap-1.5 font-bold">
+          <span className="text-lg text-white">Lv. {Math.floor(val / 10) + 1}</span>
+          <span className={`text-xs px-1.5 py-0.5 rounded-sm ${pin.bg} ${pin.color}`}>{val} pts</span>
+        </div>
+      );
+    }
+    if (pin.type === 'gold') {
+      return (
+        <div className="flex items-center gap-1.5 font-bold text-yellow-400">
+          <span className="text-lg">{character?.gold || 0}</span>
+          <span className="text-xs text-yellow-500/70">Gold</span>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div className="flex flex-col items-start justify-start w-full max-w-4xl mx-auto relative z-10 py-6 gap-6">
+    <div className="fixed inset-0 z-0 bg-slate-950 overflow-hidden">
+      {/* Map Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105 transition-transform duration-1000"
+        style={{ backgroundImage: "url('/images/world-map-bg.jpg')", filter: 'brightness(0.85)' }}
+      />
 
-      {/* Hero Header */}
-      <div className="glass-panel w-full p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-slate-400 text-sm mb-1 uppercase tracking-widest font-semibold">Kingdom of</p>
-            <h1 className="fantasy-heading text-4xl font-bold text-white">{user?.displayName}</h1>
-            <p className="text-slate-400 mt-1">Class: <span className="text-amber-400 font-semibold">{user?.class ?? 'Adventurer'}</span></p>
-          </div>
-          <div className="flex items-center gap-6">
-            {/* Gold */}
-            <div className="text-center">
-              <div className="flex items-center gap-1.5 text-yellow-400 text-2xl font-bold">
-                <Coins className="w-5 h-5" />
-                {character?.gold ?? 0}
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">Gold</p>
-            </div>
-            {/* Level */}
-            <div className="text-center">
-              <div className="text-amber-400 text-2xl font-bold">Lv {character?.level ?? 1}</div>
-              <p className="text-xs text-slate-500 mt-0.5">Level</p>
-            </div>
-          </div>
-        </div>
-
-        {/* XP Progress Bar */}
-        <div className="relative z-10 mt-6">
-          <div className="flex justify-between items-center mb-1.5 text-xs text-slate-400">
-            <div className="flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              <span>Experience</span>
-            </div>
-            <span>{currentLevelXp} / {xpRequired} XP</span>
-          </div>
-          <div className="h-3 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
-            <div
-              className="h-full bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 rounded-full transition-all duration-1000 relative"
-              style={{ width: `${xpPercent}%` }}
-            >
-              <div className="absolute inset-0 animate-pulse opacity-40 bg-white rounded-full" />
-            </div>
-          </div>
-          <p className="text-right text-xs text-slate-500 mt-1">{xpPercent}% to Level {(character?.level ?? 1) + 1}</p>
-        </div>
-
+      {/* Floating HUD overlay (since we broke out of App.tsx padding, we need to add our own top padding to avoid the nav bar) */}
+      <div className="absolute inset-0 pointer-events-none pt-24 px-6 flex justify-between items-start">
         {/* Streak Banner */}
-        {(character?.streakDays ?? 0) > 0 && (
-          <div className={`relative z-10 mt-4 flex items-center justify-between px-4 py-3 rounded-lg border ${
-            (character?.streakDays ?? 0) >= 3
-              ? 'bg-orange-500/10 border-orange-500/30'
-              : 'bg-slate-800/50 border-slate-700/50'
-          }`}>
-            <div className="flex items-center gap-2">
-              <Flame className={`w-5 h-5 ${ (character?.streakDays ?? 0) >= 3 ? 'text-orange-400 animate-pulse' : 'text-slate-500'}`} />
-              <span className="text-sm font-semibold text-slate-200">{streakLabel}</span>
+        <div className="pointer-events-auto">
+          {(character?.streakDays ?? 0) > 0 && (
+            <div className={`flex flex-col gap-1 px-4 py-3 rounded-xl border backdrop-blur-md shadow-2xl ${
+              (character?.streakDays ?? 0) >= 3
+                ? 'bg-orange-950/40 border-orange-500/40'
+                : 'bg-slate-900/60 border-slate-700/50'
+            }`}>
+              <div className="flex items-center gap-2">
+                <Flame className={`w-6 h-6 ${ (character?.streakDays ?? 0) >= 3 ? 'text-orange-400 animate-pulse' : 'text-slate-500'}`} />
+                <span className="text-lg font-bold text-slate-100">{streakLabel}</span>
+              </div>
+              {streakMultiplier > 1 && (
+                <span className="text-xs font-bold text-orange-300">
+                  {streakMultiplier}× Global XP Multiplier Active
+                </span>
+              )}
             </div>
-            {streakMultiplier > 1 && (
-              <span className="text-xs font-bold px-2 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
-                {streakMultiplier}× XP Bonus Active
-              </span>
-            )}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* Bottom Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-
-        {/* Quests Panel */}
-        <div className="glass-panel p-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl" />
-          <h2 className="text-lg font-bold mb-1 text-white flex items-center gap-2 relative z-10">
-            <MapIcon className="w-5 h-5 text-amber-500" />
-            Quest Log
-          </h2>
-          <p className="text-slate-400 text-sm mb-5 relative z-10">Track your active objectives.</p>
-          <Link
-            to="/quests"
-            className="glass-button w-full text-center block bg-amber-500/10 border-amber-500/30 hover:bg-amber-500/20 text-amber-400 relative z-10"
+        {/* Quest Shortcut */}
+        <div className="pointer-events-auto flex flex-col gap-3">
+          <button 
+            onClick={() => navigate('/quests')}
+            className="glass-panel p-4 flex items-center gap-3 hover:bg-white/10 transition-colors border-white/20 group cursor-pointer backdrop-blur-xl"
           >
-            Open Quest Log
-          </Link>
-        </div>
-
-        {/* Attributes Panel */}
-        <div className="glass-panel p-6">
-          <h2 className="text-lg font-bold mb-4 text-white">Attributes</h2>
-          <div className="space-y-3">
-            {ATTRIBUTE_CONFIG.map(({ key, label, icon: Icon, color, bar, border, bg }) => {
-              const val = (character?.attributes as any)?.[key] ?? 0;
-              const pct = maxAttr > 0 ? Math.round((val / maxAttr) * 100) : 0;
-              return (
-                <div key={key}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className={`flex items-center gap-1.5 text-xs font-semibold ${color}`}>
-                      <Icon className="w-3.5 h-3.5" />
-                      <span>{label}</span>
-                    </div>
-                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${bg} ${border} border ${color}`}>{val}</span>
-                  </div>
-                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${bar} rounded-full transition-all duration-700`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+            <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors">
+              <MapIcon className="w-5 h-5 text-blue-400" />
+            </div>
+            <div className="text-left">
+              <h3 className="font-bold text-white text-sm">Embark on Quests</h3>
+              <p className="text-xs text-slate-300">Build your kingdom</p>
+            </div>
+          </button>
         </div>
       </div>
 
-      {/* Logout */}
-      <div className="w-full flex justify-end">
-        <button
-          onClick={handleLogout}
-          className="glass-button text-red-400 hover:text-red-300 hover:bg-red-500/10 border-red-500/20 inline-flex items-center gap-2"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Leave Realm</span>
-        </button>
+      {/* Interactive Map Pins */}
+      <div className="absolute inset-0 pt-20">
+        <div className="relative w-full h-full max-w-[1600px] mx-auto">
+          {PINS.map((pin) => {
+            const Icon = pin.icon;
+            const isHovered = hoveredPin === pin.id;
+            
+            return (
+              <div
+                key={pin.id}
+                className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer transition-all duration-300"
+                style={{ left: pin.x, top: pin.y }}
+                onMouseEnter={() => setHoveredPin(pin.id)}
+                onMouseLeave={() => setHoveredPin(null)}
+              >
+                {/* Hover/Active Glass Panel */}
+                <div className={`
+                  mb-2 glass-panel p-3 min-w-[140px] flex flex-col items-center border shadow-2xl backdrop-blur-xl
+                  transition-all duration-300 transform origin-bottom
+                  ${isHovered ? 'scale-110 opacity-100' : 'scale-100 opacity-80'}
+                  ${pin.border}
+                `}>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Icon className={`w-4 h-4 ${pin.color}`} />
+                    <span className="text-sm font-bold text-white whitespace-nowrap">{pin.label}</span>
+                  </div>
+                  {renderPinContent(pin)}
+                </div>
+
+                {/* Map Pin Anchor */}
+                <div className={`
+                  w-4 h-4 rounded-full border-2 bg-slate-900 shadow-[0_0_15px_rgba(0,0,0,0.5)]
+                  transition-colors duration-300
+                  ${isHovered ? pin.border.replace('border-', 'bg-').replace('/50', '') : 'border-white/50'}
+                `} />
+                <div className="w-1 h-8 bg-gradient-to-b from-white/30 to-transparent -mt-1 pointer-events-none" />
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

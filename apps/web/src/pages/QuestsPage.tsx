@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
-import { Quest, QuestCard } from '../components/QuestCard';
+import { type Quest, QuestCard } from '../components/QuestCard';
 import { Plus, Loader2, Sparkles, Coins, ArrowUpCircle, Sword, CheckCircle2, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCharacter } from '../contexts/CharacterContext';

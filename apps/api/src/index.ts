@@ -32,12 +32,21 @@ app.get('/', (req, res) => {
 
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/lifecraft';
-    await mongoose.connect(mongoURI);
-    console.log('MongoDB Connected');
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/lifecraft';
+    await mongoose.connect(mongoUri);
+    console.log('MongoDB connected');
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
+    console.warn('Failed to connect to primary MongoDB, falling back to in-memory database...', error);
+    try {
+      const { MongoMemoryServer } = await import('mongodb-memory-server');
+      const mongoServer = await MongoMemoryServer.create();
+      const uri = mongoServer.getUri();
+      await mongoose.connect(uri);
+      console.log(`Connected to in-memory MongoDB at ${uri}`);
+    } catch (memError) {
+      console.error('Failed to start in-memory MongoDB:', memError);
+      process.exit(1);
+    }
   }
 };
 

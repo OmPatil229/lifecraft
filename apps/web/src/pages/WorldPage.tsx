@@ -1,9 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCharacter } from '../contexts/CharacterContext';
-import { LogOut, Map as MapIcon, Coins, Sparkles, BookOpen, Dumbbell, Brain, Leaf, Eye } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { LogOut, Map as MapIcon, Coins, Sparkles, BookOpen, Dumbbell, Brain, Leaf, Eye, Loader2, Flame } from 'lucide-react';
 
 const ATTRIBUTE_CONFIG = [
   { key: 'intelligence', label: 'Intelligence', icon: Brain,    color: 'text-purple-400', bar: 'bg-purple-500', border: 'border-purple-500/20', bg: 'bg-purple-500/10' },
@@ -15,7 +13,7 @@ const ATTRIBUTE_CONFIG = [
 
 const WorldPage = () => {
   const { user, logout } = useAuth();
-  const { character, isLoading, currentLevelXp, xpRequired, xpPercent } = useCharacter();
+  const { character, isLoading, currentLevelXp, xpRequired, xpPercent, streakLabel, streakMultiplier } = useCharacter();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -85,6 +83,25 @@ const WorldPage = () => {
           </div>
           <p className="text-right text-xs text-slate-500 mt-1">{xpPercent}% to Level {(character?.level ?? 1) + 1}</p>
         </div>
+
+        {/* Streak Banner */}
+        {(character?.streakDays ?? 0) > 0 && (
+          <div className={`relative z-10 mt-4 flex items-center justify-between px-4 py-3 rounded-lg border ${
+            (character?.streakDays ?? 0) >= 3
+              ? 'bg-orange-500/10 border-orange-500/30'
+              : 'bg-slate-800/50 border-slate-700/50'
+          }`}>
+            <div className="flex items-center gap-2">
+              <Flame className={`w-5 h-5 ${ (character?.streakDays ?? 0) >= 3 ? 'text-orange-400 animate-pulse' : 'text-slate-500'}`} />
+              <span className="text-sm font-semibold text-slate-200">{streakLabel}</span>
+            </div>
+            {streakMultiplier > 1 && (
+              <span className="text-xs font-bold px-2 py-1 rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                {streakMultiplier}× XP Bonus Active
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Bottom Grid */}

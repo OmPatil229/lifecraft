@@ -16,6 +16,7 @@ export interface CharacterData {
   totalXp: number;
   gold: number;
   attributes: CharacterAttributes;
+  streakDays: number;
   unlockedSkills: string[];
 }
 
@@ -45,6 +46,10 @@ interface CharacterContextType {
   xpRequired: number;
   /** 0–100 progress percentage for the XP bar */
   xpPercent: number;
+  /** Current streak label (e.g. "🔥 7 day streak") */
+  streakLabel: string;
+  /** Current XP multiplier from streak (e.g. 1.5) */
+  streakMultiplier: number;
   /** Reload character from the server */
   refresh: () => Promise<void>;
   /** Optimistically apply a reward returned by completeQuest */
@@ -92,9 +97,18 @@ export const CharacterProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const currentLevelXp = Math.max(0, totalXp - levelStartXp);
   const xpPercent = xpRequired > 0 ? Math.min(100, Math.round((currentLevelXp / xpRequired) * 100)) : 0;
 
+  // Derived streak values
+  const streakDays = character?.streakDays ?? 0;
+  const streakMultiplier = streakDays >= 30 ? 2.0 : streakDays >= 7 ? 1.5 : streakDays >= 3 ? 1.25 : 1.0;
+  const streakLabel = streakDays === 0
+    ? ''
+    : streakDays === 1
+    ? '🔥 1 day streak'
+    : `🔥 ${streakDays} day streak${streakMultiplier > 1 ? ` • ${streakMultiplier}× XP` : ''}`;
+
   return (
     <CharacterContext.Provider
-      value={{ character, isLoading, currentLevelXp, xpRequired, xpPercent, refresh, applyReward }}
+      value={{ character, isLoading, currentLevelXp, xpRequired, xpPercent, streakLabel, streakMultiplier, refresh, applyReward }}
     >
       {children}
     </CharacterContext.Provider>

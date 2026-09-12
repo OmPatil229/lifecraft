@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { Quest } from '../models/Quest';
 import { Character } from '../models/Character';
 import { QuestCompletion } from '../models/QuestCompletion';
-import { calculateQuestReward, mapCategoryToAttribute, processLevelUps } from '../utils/engine';
+import { calculateQuestReward, mapCategoryToAttribute, processLevelUps, getStreakMultiplier, calculateNewStreak } from '../utils/engine';
 
 // Accept any non-empty string for dueDate; controller will parse it
 const questSchema = z.object({
@@ -161,15 +161,24 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Step 4: Apply rewards. XP and gold are added first.
-    character.totalXp += reward.xp;
+    // Step 4: Calculate streak and XP multiplier
+    const newStreak = calculateNewStreak(character.streakDays, character.lastActivityDate);
+    const multiplier = getStreakMultiplier(newStreak);
+    const baseXp = reward.xp;
+    const bonusXp = Math.floor(baseXp * (multiplier - 1));
+    const totalXpGained = baseXp + bonusXp;
+
+    character.streakDays = newStreak;
+    character.lastActivityDate = new Date();
+
+    // Step 5: Apply rewards. XP and gold are added first.
+    character.totalXp += totalXpGained;
     character.gold += reward.gold;
 
-    // Step 5: Increment the attribute associated with the quest category
+    // Step 6: Increment the attribute associated with the quest category
     (character.attributes as any)[attribute] = ((character.attributes as any)[attribute] || 0) + 1;
 
-    // Step 6: Calculate level-ups AFTER totalXp has been updated, using current level BEFORE update.
-    // This is correct: we check if the new totalXp crosses any level thresholds from the current level.
+    // Step 7: Calculate level-ups AFTER totalXp has been updated.
     const levelUpResult = processLevelUps(character.level, character.totalXp);
     const didLevelUp = levelUpResult.levelsGained > 0;
 
@@ -188,10 +197,21 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
     });
     await completion.save();
 
-    // Step 9: Return result to the client so UI can show reward toast / level-up modal
+    // Step 9: Return result so the UI can show reward toast / level-up modal
     res.status(200).json({
       quest,
-      reward,
+      reward: {
+        ...reward,
+        xp: totalXpGained,   // return multiplied XP so toast is accurate
+        baseXp,
+        bonusXp,
+        multiplier,
+      },
+      streak: {
+        days: newStreak,
+        multiplier,
+        isNew: newStreak !== character.streakDays,
+      },
       levelUp: didLevelUp,
       newLevel: character.level,
       levelsGained: levelUpResult.levelsGained,
@@ -200,6 +220,7 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
         totalXp: character.totalXp,
         gold: character.gold,
         attributes: character.attributes,
+        streakDays: character.streakDays,
       },
     });
   } catch (error) {

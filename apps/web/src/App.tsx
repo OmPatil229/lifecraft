@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Compass, Sparkles, Coins } from 'lucide-react';
+import { Compass, Sparkles, Coins, Flame } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CharacterProvider, useCharacter } from './contexts/CharacterContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -14,7 +14,8 @@ import './App.css';
 
 const Navigation = () => {
   const { user } = useAuth();
-  const { character, xpPercent, currentLevelXp, xpRequired } = useCharacter();
+  const { character, xpPercent, currentLevelXp, xpRequired, streakLabel } = useCharacter();
+  const streak = character?.streakDays ?? 0;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-x-0 border-t-0 rounded-none px-6 py-3 flex justify-between items-center gap-4">
@@ -25,6 +26,17 @@ const Navigation = () => {
 
       {user ? (
         <div className="flex items-center gap-4 flex-1 justify-end">
+          {/* Streak flame (only shows when streak ≥ 3) */}
+          {streak >= 3 && (
+            <div
+              className="hidden sm:flex items-center gap-1 text-sm font-semibold text-orange-400 animate-pulse"
+              title={streakLabel}
+            >
+              <Flame className="w-4 h-4 text-orange-500" />
+              <span>{streak}</span>
+            </div>
+          )}
+
           {/* Gold display */}
           <div className="hidden sm:flex items-center gap-1.5 text-sm">
             <Coins className="w-4 h-4 text-yellow-500" />

@@ -12,6 +12,8 @@ export interface ICharacter extends Document {
     focus: number;
     vitality: number;
   };
+  streakDays: number;
+  lastActivityDate: Date | null;
   unlockedSkills: string[];
   equippedItems: string[];
 }
@@ -29,6 +31,8 @@ const CharacterSchema = new Schema<ICharacter>(
       focus: { type: Number, default: 0 },
       vitality: { type: Number, default: 0 },
     },
+    streakDays: { type: Number, default: 0 },
+    lastActivityDate: { type: Date, default: null },
     unlockedSkills: [{ type: String }],
     equippedItems: [{ type: String }],
   },

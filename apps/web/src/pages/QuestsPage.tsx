@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { Quest, QuestCard } from '../components/QuestCard';
-import { Plus, Loader2, Sparkles, Coins, ArrowUpCircle, Sword, CheckCircle2 } from 'lucide-react';
+import { Plus, Loader2, Sparkles, Coins, ArrowUpCircle, Sword, CheckCircle2, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCharacter } from '../contexts/CharacterContext';
 
@@ -38,17 +38,21 @@ const QuestsPage = () => {
     try {
       const response = await apiFetch(`/quests/${id}/complete`, { method: 'POST' });
 
-      // Push reward into CharacterContext so nav XP bar updates instantly
+      // Push updated character into context so nav XP bar and WorldPage refresh instantly
       if (response.character) {
         applyReward({ character: response.character });
       }
 
-      // Show reward toast
+      // Show reward toast (include streak info if relevant)
       setRewardToast({
         xp: response.reward.xp,
+        baseXp: response.reward.baseXp,
+        bonusXp: response.reward.bonusXp,
+        multiplier: response.reward.multiplier,
         gold: response.reward.gold,
         levelUp: response.levelUp,
         newLevel: response.newLevel,
+        streakDays: response.streak?.days ?? 0,
       });
 
       setTimeout(() => setRewardToast(null), 5000);
@@ -69,7 +73,7 @@ const QuestsPage = () => {
       {/* Reward Toast */}
       {rewardToast && (
         <div className="fixed top-24 right-6 z-50">
-          <div className="glass-panel p-5 border-amber-500/40 shadow-[0_0_40px_-5px_rgba(245,158,11,0.3)] min-w-[220px]">
+          <div className="glass-panel p-5 border-amber-500/40 shadow-[0_0_40px_-5px_rgba(245,158,11,0.3)] min-w-[240px]">
             {rewardToast.levelUp && (
               <div className="text-amber-400 font-bold text-base mb-3 flex items-center gap-2">
                 <ArrowUpCircle className="w-5 h-5" />
@@ -80,12 +84,22 @@ const QuestsPage = () => {
               <div className="flex items-center gap-1.5 text-blue-400">
                 <Sparkles className="w-4 h-4" />
                 +{rewardToast.xp} XP
+                {rewardToast.bonusXp > 0 && (
+                  <span className="text-orange-400 text-xs">(+{rewardToast.bonusXp} streak)</span>
+                )}
               </div>
               <div className="flex items-center gap-1.5 text-yellow-400">
                 <Coins className="w-4 h-4" />
                 +{rewardToast.gold} Gold
               </div>
             </div>
+            {rewardToast.streakDays > 0 && (
+              <div className="mt-2 flex items-center gap-1.5 text-xs text-orange-400 font-semibold">
+                <Flame className="w-3.5 h-3.5" />
+                {rewardToast.streakDays} day streak
+                {rewardToast.multiplier > 1 && ` • ${rewardToast.multiplier}× XP`}
+              </div>
+            )}
           </div>
         </div>
       )}

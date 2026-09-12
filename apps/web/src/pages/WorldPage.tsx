@@ -112,6 +112,13 @@ const HudStat: React.FC<{ label: string; value: string | number; accent: string 
   </div>
 );
 
+const getPinTargetUrl = (pin: typeof PINS[0]) => {
+  if (pin.categoryFilter) {
+    return `${pin.route}?category=${encodeURIComponent(pin.categoryFilter)}`;
+  }
+  return pin.route;
+};
+
 // ─────────────────────────────────────────────
 // Pin Detail Panel (appears on pin click)
 // ─────────────────────────────────────────────
@@ -125,6 +132,7 @@ const PinPanel: React.FC<{
   onClose: () => void;
 }> = ({ pin, character, currentLevelXp, xpRequired, xpPercent, onNavigate, onClose }) => {
   const Icon = pin.icon;
+  const targetUrl = getPinTargetUrl(pin);
 
   const renderStats = () => {
     if (pin.type === 'level') {
@@ -196,15 +204,20 @@ const PinPanel: React.FC<{
 
         {/* Header */}
         <div className="flex items-start justify-between mb-3 relative z-10">
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => onNavigate(targetUrl)}
+          >
             <div
-              className="p-2.5 rounded-xl"
+              className="p-2.5 rounded-xl transition-transform group-hover:scale-110"
               style={{ background: `${pin.accent}20`, border: `1px solid ${pin.accent}40` }}
             >
               <Icon className="w-5 h-5" style={{ color: pin.accent }} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">{pin.label}</h3>
+              <h3 className="text-base font-bold text-white group-hover:underline flex items-center gap-1.5">
+                {pin.label}
+              </h3>
               <span className="text-xs font-semibold" style={{ color: pin.accent }}>{pin.sublabel}</span>
             </div>
           </div>
@@ -220,16 +233,21 @@ const PinPanel: React.FC<{
 
         {/* CTA Button */}
         <button
-          onClick={() => onNavigate(pin.route)}
-          className="mt-4 w-full py-2.5 rounded-xl text-sm font-bold transition-all duration-200 hover:opacity-90 active:scale-95 flex items-center justify-center gap-2 relative z-10"
+          onClick={() => onNavigate(targetUrl)}
+          className="mt-4 w-full py-2.5 rounded-xl text-sm font-bold transition-all duration-200 hover:opacity-90 active:scale-95 flex items-center justify-center gap-2 relative z-10 shadow-lg cursor-pointer"
           style={{
-            background: `linear-gradient(135deg, ${pin.accent}30, ${pin.accent}15)`,
-            border: `1px solid ${pin.accent}50`,
-            color: pin.accent,
+            background: `linear-gradient(135deg, ${pin.accent}40, ${pin.accent}20)`,
+            border: `1px solid ${pin.accent}60`,
+            color: '#ffffff',
+            boxShadow: `0 0 20px ${pin.accent}30`,
           }}
         >
-          <Sword className="w-4 h-4" />
-          {pin.type === 'level' ? 'View Dashboard' : pin.type === 'boss' ? 'Enter Arena' : `Go to ${pin.label}`}
+          <Sword className="w-4 h-4" style={{ color: pin.accent }} />
+          {pin.type === 'level'
+            ? 'Open Dashboard'
+            : pin.type === 'boss'
+            ? 'Enter Boss Arena'
+            : `Open ${pin.label} (${pin.categoryFilter || 'Quests'})`}
         </button>
       </div>
 
@@ -337,9 +355,23 @@ const WorldPage = () => {
           return (
             <div
               key={pin.id}
-              className="absolute z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer"
+              className="absolute z-20 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer group"
               style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
-              onClick={(e) => { e.stopPropagation(); setSelectedPin(isSelected ? null : pin.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isSelected) {
+                  // If already selected, second click directly opens/redirects
+                  setSelectedPin(null);
+                  navigate(getPinTargetUrl(pin));
+                } else {
+                  setSelectedPin(pin.id);
+                }
+              }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                setSelectedPin(null);
+                navigate(getPinTargetUrl(pin));
+              }}
               onMouseEnter={() => setHoveredPin(pin.id)}
               onMouseLeave={() => setHoveredPin(null)}
             >

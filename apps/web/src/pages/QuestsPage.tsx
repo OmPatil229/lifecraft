@@ -5,6 +5,7 @@ import {
   Plus, Loader2, Sparkles, Coins, Sword,
   Flame, Star, X, Terminal, Brain, Dumbbell, BookOpen, Book, Heart, User
 } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { useCharacter } from '../contexts/CharacterContext';
 
 // ── Category filter config ───────────────────
@@ -283,11 +284,19 @@ const CreateQuestModal: React.FC<{
 
 // ── QuestsPage ───────────────────────────────
 const QuestsPage = () => {
+  const [searchParams] = useSearchParams();
   const [quests, setQuests] = useState<Quest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>('active');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState(() => searchParams.get('category') || '');
   const [diffFilter, setDiffFilter] = useState('All');
+
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat !== null) {
+      setCategoryFilter(cat);
+    }
+  }, [searchParams]);
   const [questModal, setQuestModal] = useState(false);
   const [completeModal, setCompleteModal] = useState<any>(null);
   const [levelUpModal, setLevelUpModal] = useState<number | null>(null);

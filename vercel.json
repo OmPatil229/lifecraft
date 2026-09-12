@@ -11,7 +11,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://lifecraft-api.onrender.com/api/$1"
+      "dest": "https://lifecraft-9v9d.onrender.com/api/$1"
     },
     { "handle": "filesystem" },
     {

@@ -1,0 +1,14 @@
+{
+  "buildCommand": "npm run build --workspaces --if-present",
+  "outputDirectory": "apps/web/dist",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

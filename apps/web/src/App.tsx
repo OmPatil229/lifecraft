@@ -17,66 +17,89 @@ const Navigation = () => {
   const { user } = useAuth();
   const { character, xpPercent, currentLevelXp, xpRequired, streakLabel } = useCharacter();
   const streak = character?.streakDays ?? 0;
+  const location = window.location.pathname;
+
+  const navLink = (to: string, label: string, activeStyle: string) => {
+    const isActive = location === to || location.startsWith(to + '/');
+    return (
+      <Link
+        to={to}
+        className={`relative px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+          isActive ? activeStyle : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+        }`}
+      >
+        {label}
+        {isActive && (
+          <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 w-4 h-0.5 bg-current rounded-full opacity-60" />
+        )}
+      </Link>
+    );
+  };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-panel border-x-0 border-t-0 rounded-none px-6 py-3 flex justify-between items-center gap-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl px-6 py-0 flex justify-between items-center h-16">
+      {/* Logo */}
       <Link to={user ? '/world' : '/'} className="flex items-center gap-2 group flex-shrink-0">
-        <Compass className="w-6 h-6 text-amber-500 group-hover:rotate-45 transition-transform duration-500" />
-        <span className="fantasy-heading text-xl font-bold tracking-wider">LIFECRAFT</span>
+        <Compass className="w-5 h-5 text-amber-500 group-hover:rotate-45 transition-transform duration-500" />
+        <span className="text-base font-black tracking-[0.15em] text-white">LIFECRAFT</span>
       </Link>
 
       {user ? (
-        <div className="flex items-center gap-4 flex-1 justify-end">
-          {/* Streak flame (only shows when streak ≥ 3) */}
-          {streak >= 3 && (
-            <div
-              className="hidden sm:flex items-center gap-1 text-sm font-semibold text-orange-400 animate-pulse"
-              title={streakLabel}
-            >
-              <Flame className="w-4 h-4 text-orange-500" />
-              <span>{streak}</span>
-            </div>
-          )}
-
-          {/* Gold display */}
-          <div className="hidden sm:flex items-center gap-1.5 text-sm">
-            <Coins className="w-4 h-4 text-yellow-500" />
-            <span className="text-yellow-400 font-bold">{character?.gold ?? 0}</span>
+        <>
+          {/* Center nav links */}
+          <div className="flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            {navLink('/world', '🗺 World', 'text-amber-400 bg-amber-500/10')}
+            {navLink('/quests', '⚔️ Quests', 'text-blue-400 bg-blue-500/10')}
+            {navLink('/bosses', '👹 Bosses', 'text-rose-400 bg-rose-500/10')}
           </div>
 
-          {/* XP bar + level */}
-          <div className="hidden md:flex items-center gap-2 flex-1 max-w-xs">
-            <span className="text-xs text-slate-400 font-semibold whitespace-nowrap">
-              Lv <span className="text-amber-400">{character?.level ?? 1}</span>
-            </span>
-            <div
-              className="relative flex-1 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50"
-              title={`${currentLevelXp} / ${xpRequired} XP`}
-            >
+          {/* Right: stats + avatar */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {/* Streak */}
+            {streak >= 3 && (
               <div
-                className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-700"
-                style={{ width: `${xpPercent}%` }}
-              />
-            </div>
-            <div className="flex items-center gap-0.5 text-xs text-slate-500 whitespace-nowrap">
-              <Sparkles className="w-3 h-3 text-blue-400" />
-              <span>{currentLevelXp}/{xpRequired}</span>
-            </div>
-          </div>
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-xs font-bold text-orange-400"
+                title={streakLabel}
+              >
+                <Flame className="w-3.5 h-3.5" />
+                {streak}d
+              </div>
+            )}
 
-          {/* User name + nav links */}
-          <div className="flex items-center gap-3">
-            <Link to="/quests" className="glass-button py-1.5 text-sm hidden sm:block">
-              Quests
-            </Link>
-            <Link to="/bosses" className="glass-button py-1.5 text-sm hidden sm:block bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-400">
-              Boss Arena
-            </Link>
-            <Link to="/world" className="flex items-center gap-1.5 text-sm font-medium text-amber-500 hover:text-amber-400 transition-colors">
-              {user.displayName}
+            {/* Gold */}
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs font-bold text-yellow-400">
+              <Coins className="w-3.5 h-3.5" />
+              {character?.gold ?? 0}
+            </div>
+
+            {/* XP bar */}
+            <div className="hidden md:flex items-center gap-2 min-w-[140px]">
+              <span className="text-xs font-bold text-amber-400 whitespace-nowrap">Lv {character?.level ?? 1}</span>
+              <div
+                className="relative flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50"
+                title={`${currentLevelXp} / ${xpRequired} XP`}
+              >
+                <div
+                  className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-700"
+                  style={{ width: `${xpPercent}%` }}
+                />
+              </div>
+              <div className="flex items-center gap-0.5 text-[10px] text-slate-500 whitespace-nowrap">
+                <Sparkles className="w-2.5 h-2.5 text-blue-400" />
+                {currentLevelXp}
+              </div>
+            </div>
+
+            {/* Avatar */}
+            <Link
+              to="/world"
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-sm font-black text-slate-950 hover:scale-110 transition-transform"
+              title={user.displayName}
+            >
+              {user.displayName?.[0]?.toUpperCase() ?? '?'}
             </Link>
           </div>
-        </div>
+        </>
       ) : (
         <div className="flex gap-3">
           <Link to="/login" className="glass-button py-1.5 text-sm">Log In</Link>
@@ -88,6 +111,7 @@ const Navigation = () => {
     </nav>
   );
 };
+
 
 function App() {
   return (

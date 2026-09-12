@@ -27,25 +27,19 @@ const QuestDetailPage = () => {
 
   const fetchQuest = async () => {
     try {
-      // The backend returns a list in /quests, so if we don't have a GET /quests/:id,
-      // we can fetch all and find it, or we should add GET /quests/:id.
-      // Since we didn't add GET /quests/:id, let's fetch all and filter.
-      const quests = await apiFetch('/quests');
-      const quest = quests.find((q: any) => q._id === id);
-      
+      const quest = await apiFetch(`/quests/${id}`);
       if (quest) {
         setFormData({
           title: quest.title,
           description: quest.description || '',
           category: quest.category,
           difficulty: quest.difficulty,
+          // Convert ISO string to YYYY-MM-DD for the date input
           dueDate: quest.dueDate ? new Date(quest.dueDate).toISOString().split('T')[0] : '',
         });
-      } else {
-        setError('Quest not found');
       }
     } catch (err) {
-      setError('Failed to load quest');
+      setError('Quest not found');
     } finally {
       setIsLoading(false);
     }

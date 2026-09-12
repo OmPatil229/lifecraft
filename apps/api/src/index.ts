@@ -54,17 +54,10 @@ const connectDB = async () => {
   }
 };
 
-// Vercel serverless functions shouldn't use app.listen().
-// They instead require the Express app to be exported.
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-  connectDB().then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server listening on port ${PORT}`);
-    });
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
   });
-} else {
-  // Connect to the database globally for Vercel
-  connectDB();
-}
+});
 
 export default app;

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { Quest } from '../models/Quest';
 import { Character } from '../models/Character';
 import { QuestCompletion } from '../models/QuestCompletion';
+import { Boss } from '../models/Boss';
 import { calculateQuestReward, mapCategoryToAttribute, processLevelUps, getStreakMultiplier, calculateNewStreak } from '../utils/engine';
 
 // Accept any non-empty string for dueDate; controller will parse it
@@ -186,8 +187,36 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
       character.level = levelUpResult.newLevel;
     }
 
-    // Step 7: Persist character changes
+    // Step 8: Persist character changes
     await character.save();
+
+    // Step 8b: Deal damage to any alive boss that matches the quest category
+    const DAMAGE_BY_DIFFICULTY: Record<string, number> = {
+      Easy: 5, Medium: 15, Hard: 30, Epic: 60,
+    };
+    const damage = DAMAGE_BY_DIFFICULTY[quest.difficulty] ?? 15;
+
+    let bossDefeated: any = null;
+    const aliveBoss = await Boss.findOne({
+      userId: req.userId,
+      category: quest.category,
+      status: 'alive',
+    });
+
+    if (aliveBoss) {
+      aliveBoss.currentHp = Math.max(0, aliveBoss.currentHp - damage);
+      const isDefeated = aliveBoss.currentHp === 0;
+      if (isDefeated) {
+        aliveBoss.status = 'defeated';
+        aliveBoss.defeatedAt = new Date();
+        // Grant boss defeat reward on top of quest reward
+        character.totalXp += aliveBoss.reward.xp;
+        character.gold += aliveBoss.reward.gold;
+        await character.save();
+        bossDefeated = aliveBoss.toObject();
+      }
+      await aliveBoss.save();
+    }
 
     // Step 8: Log the completion for auditing and idempotency
     const completion = new QuestCompletion({
@@ -222,6 +251,8 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
         attributes: character.attributes,
         streakDays: character.streakDays,
       },
+      bossDamage: aliveBoss ? { bossId: aliveBoss._id, damage, remainingHp: aliveBoss.currentHp } : null,
+      bossDefeated,
     });
   } catch (error) {
     console.error('Error completing quest:', error);

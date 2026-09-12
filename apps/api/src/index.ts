@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import questsRoutes from './routes/quests';
 import characterRoutes from './routes/character';
+import bossesRoutes from './routes/bosses';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/quests', questsRoutes);
 app.use('/api/character', characterRoutes);
+app.use('/api/bosses', bossesRoutes);
 
 app.get('/', (req, res) => {
   res.send('LIFECRAFT API running');

@@ -9,6 +9,7 @@ import SignupPage from './pages/SignupPage';
 import WorldPage from './pages/WorldPage';
 import QuestsPage from './pages/QuestsPage';
 import QuestDetailPage from './pages/QuestDetailPage';
+import BossesPage from './pages/BossesPage';
 import NotFoundPage from './pages/NotFoundPage';
 import './App.css';
 
@@ -68,6 +69,9 @@ const Navigation = () => {
             <Link to="/quests" className="glass-button py-1.5 text-sm hidden sm:block">
               Quests
             </Link>
+            <Link to="/bosses" className="glass-button py-1.5 text-sm hidden sm:block bg-red-500/10 border-red-500/20 hover:bg-red-500/20 text-red-400">
+              Boss Arena
+            </Link>
             <Link to="/world" className="flex items-center gap-1.5 text-sm font-medium text-amber-500 hover:text-amber-400 transition-colors">
               {user.displayName}
             </Link>
@@ -104,6 +108,7 @@ function App() {
                 <Route path="/world" element={<ProtectedRoute><WorldPage /></ProtectedRoute>} />
                 <Route path="/quests" element={<ProtectedRoute><QuestsPage /></ProtectedRoute>} />
                 <Route path="/quests/:id" element={<ProtectedRoute><QuestDetailPage /></ProtectedRoute>} />
+                <Route path="/bosses" element={<ProtectedRoute><BossesPage /></ProtectedRoute>} />
 
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>

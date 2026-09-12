@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { User } from '../models/User';
 import { Character } from '../models/Character';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+const getJwtSecret = () => process.env.JWT_SECRET || 'fallback_secret';
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -43,7 +43,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
     await character.save();
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
     
     res.cookie('token', token, {
       httpOnly: true,
@@ -87,7 +87,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
     
     res.cookie('token', token, {
       httpOnly: true,

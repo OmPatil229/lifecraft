@@ -1,14 +1,14 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import questsRoutes from './routes/quests';
 import characterRoutes from './routes/character';
 import bossesRoutes from './routes/bosses';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001; // Change to 3001 so frontend can use 3000 or vite defaults

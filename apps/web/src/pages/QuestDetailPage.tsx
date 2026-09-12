@@ -158,7 +158,7 @@ const QuestDetailPage = () => {
                 onChange={handleChange}
                 className="w-full bg-slate-900/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-amber-500/50 transition-all"
               >
-                <option value="Coding">Coding</option>
+                <option value="Work">Work</option>
                 <option value="Studying">Studying</option>
                 <option value="Fitness">Fitness</option>
                 <option value="Reading">Reading</option>

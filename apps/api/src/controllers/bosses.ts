@@ -5,12 +5,12 @@ import { Boss } from '../models/Boss';
 const bossSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  category: z.enum(['Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal']).default('Personal'),
-  maxHp: z.number().int().min(10).max(10000).default(100),
+  category: z.enum(['Work', 'Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal']).default('Personal'),
+  maxHp: z.number().int().min(10).max(2000).default(100),
   reward: z
     .object({
-      xp: z.number().int().min(0).default(500),
-      gold: z.number().int().min(0).default(200),
+      xp: z.number().int().min(50).max(5000).default(500),
+      gold: z.number().int().min(10).max(2000).default(200),
     })
     .optional(),
 });
@@ -48,7 +48,7 @@ export const createBoss = async (req: Request, res: Response): Promise<void> => 
     res.status(201).json(boss);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Validation failed', details: error.errors });
+      res.status(400).json({ error: 'Validation failed', details: error.issues });
       return;
     }
     console.error('Error creating boss:', error);

@@ -11,7 +11,7 @@ const questSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   category: z
-    .enum(['Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal'])
+    .enum(['Work', 'Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal'])
     .default('Personal'),
   difficulty: z.enum(['Easy', 'Medium', 'Hard', 'Epic']).default('Medium'),
   dueDate: z.string().optional(),
@@ -67,7 +67,7 @@ export const createQuest = async (req: Request, res: Response): Promise<void> =>
     res.status(201).json(quest);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Validation failed', details: error.errors });
+      res.status(400).json({ error: 'Validation failed', details: error.issues });
       return;
     }
     console.error('Error creating quest:', error);
@@ -102,7 +102,7 @@ export const updateQuest = async (req: Request, res: Response): Promise<void> =>
     res.status(200).json(quest);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({ error: 'Validation failed', details: error.errors });
+      res.status(400).json({ error: 'Validation failed', details: error.issues });
       return;
     }
     console.error('Error updating quest:', error);
@@ -208,12 +208,20 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
       const isDefeated = aliveBoss.currentHp === 0;
       if (isDefeated) {
         aliveBoss.status = 'defeated';
-        aliveBoss.defeatedAt = new Date();
-        // Grant boss defeat reward on top of quest reward
-        character.totalXp += aliveBoss.reward.xp;
-        character.gold += aliveBoss.reward.gold;
-        bossDefeated = aliveBoss.toObject();
-        // Save the updated character (with boss bonus) before saving the boss
+        // Grant boss defeat reward clamped to system boundaries (max 5,000 XP, max 2,000 Gold)
+        const bossXp = Math.min(5000, Math.max(50, aliveBoss.reward?.xp || 500));
+        const bossGold = Math.min(2000, Math.max(10, aliveBoss.reward?.gold || 200));
+        character.totalXp += bossXp;
+        character.gold += bossGold;
+
+        // Recalculate level if boss XP pushed character past level threshold
+        const postBossLevelResult = processLevelUps(character.level, character.totalXp);
+        if (postBossLevelResult.levelsGained > 0) {
+          character.level = postBossLevelResult.newLevel;
+        }
+
+        bossDefeated = { ...aliveBoss.toObject(), reward: { xp: bossXp, gold: bossGold } };
+        // Save the updated character (with clamped boss bonus) before saving the boss
         await character.save();
       }
       await aliveBoss.save();

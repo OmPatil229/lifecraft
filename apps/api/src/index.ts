@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 3001; // Change to 3001 so frontend can use 3000 or vite defaults
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite default port
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
 }));
 

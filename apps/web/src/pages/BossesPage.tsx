@@ -16,6 +16,7 @@ interface Boss {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
+  Work: 'from-indigo-900/50 to-indigo-800/20 border-indigo-500/30',
   Coding: 'from-purple-900/50 to-purple-800/20 border-purple-500/30',
   Studying: 'from-blue-900/50 to-blue-800/20 border-blue-500/30',
   Fitness: 'from-red-900/50 to-red-800/20 border-red-500/30',
@@ -48,14 +49,18 @@ const CreateBossModal: React.FC<{ onClose: () => void; onCreate: (boss: Boss) =>
     setIsSaving(true);
     setError('');
     try {
+      const clampedMaxHp = Math.min(2000, Math.max(10, form.maxHp));
+      const clampedXp = Math.min(5000, Math.max(50, form.rewardXp));
+      const clampedGold = Math.min(2000, Math.max(10, form.rewardGold));
+
       const boss = await apiFetch('/bosses', {
         method: 'POST',
         body: JSON.stringify({
           title: form.title,
           description: form.description || undefined,
           category: form.category,
-          maxHp: form.maxHp,
-          reward: { xp: form.rewardXp, gold: form.rewardGold },
+          maxHp: clampedMaxHp,
+          reward: { xp: clampedXp, gold: clampedGold },
         }),
       });
       onCreate(boss);
@@ -88,22 +93,22 @@ const CreateBossModal: React.FC<{ onClose: () => void; onCreate: (boss: Boss) =>
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">Category</label>
               <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className="glass-input">
-                {['Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal'].map(c => <option key={c} value={c}>{c}</option>)}
+                {['Work', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal'].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">HP Pool</label>
-              <input type="number" value={form.maxHp} onChange={e => setForm(p => ({ ...p, maxHp: parseInt(e.target.value) || 100 }))} className="glass-input" min={10} max={10000} />
+              <label className="block text-sm font-medium text-slate-300 mb-1">HP Pool <span className="text-xs text-slate-500">(10 - 2,000)</span></label>
+              <input type="number" value={form.maxHp} onChange={e => setForm(p => ({ ...p, maxHp: Math.min(2000, Math.max(1, parseInt(e.target.value) || 100)) }))} className="glass-input" min={10} max={2000} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Defeat Reward XP</label>
-              <input type="number" value={form.rewardXp} onChange={e => setForm(p => ({ ...p, rewardXp: parseInt(e.target.value) || 500 }))} className="glass-input" min={0} />
+              <label className="block text-sm font-medium text-slate-300 mb-1">Defeat XP <span className="text-xs text-slate-500">(50 - 5,000)</span></label>
+              <input type="number" value={form.rewardXp} onChange={e => setForm(p => ({ ...p, rewardXp: Math.min(5000, Math.max(0, parseInt(e.target.value) || 500)) }))} className="glass-input" min={50} max={5000} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Defeat Reward Gold</label>
-              <input type="number" value={form.rewardGold} onChange={e => setForm(p => ({ ...p, rewardGold: parseInt(e.target.value) || 200 }))} className="glass-input" min={0} />
+              <label className="block text-sm font-medium text-slate-300 mb-1">Defeat Gold <span className="text-xs text-slate-500">(10 - 2,000)</span></label>
+              <input type="number" value={form.rewardGold} onChange={e => setForm(p => ({ ...p, rewardGold: Math.min(2000, Math.max(0, parseInt(e.target.value) || 200)) }))} className="glass-input" min={10} max={2000} />
             </div>
           </div>
 
@@ -251,7 +256,7 @@ const BossesPage = () => {
 
       {showModal && <CreateBossModal onClose={() => setShowModal(false)} onCreate={handleCreate} />}
 
-      <div className="flex justify-between items-start mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8">
         <div>
           <h1 className="fantasy-heading text-4xl mb-1 text-white">Boss Arena</h1>
           <p className="text-slate-400 text-sm">Summon long-term challenges. Slay them with quests.</p>

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: lifecraft-api
+    env: node
+    buildCommand: npm install && npm run build -w apps/api
+    startCommand: cd apps/api && node dist/index.js
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: CLIENT_URL
+        value: https://lifecraft-web.onrender.com
+
+  - type: web
+    name: lifecraft-web
+    env: static
+    buildCommand: npm install && npm run build -w apps/web
+    staticPublishPath: apps/web/dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://lifecraft-api.onrender.com/api/*

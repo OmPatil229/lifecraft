@@ -64,6 +64,7 @@ export const calculateQuestReward = (difficulty: string): QuestReward => {
 
 export const mapCategoryToAttribute = (category: string): string => {
   switch (category) {
+    case 'Work':
     case 'Coding':
       return 'intelligence';
     case 'Studying':
@@ -93,12 +94,14 @@ export const getCumulativeXpRequirement = (level: number): number => {
   return total;
 };
 
-// Recursively processes level ups to handle multi-level gains from a single large reward
+export const MAX_LEVEL = 100;
+
+// Processes level ups to handle multi-level gains within system boundaries
 export const processLevelUps = (currentLevel: number, totalXp: number): LevelUpResult => {
-  let tempLevel = currentLevel;
+  let tempLevel = Math.min(currentLevel, MAX_LEVEL);
   let levelsGained = 0;
   
-  while (true) {
+  while (tempLevel < MAX_LEVEL) {
     const requiredForNext = getCumulativeXpRequirement(tempLevel + 1);
     // If we have enough cumulative XP to surpass the threshold for the NEXT level
     if (totalXp >= requiredForNext) {

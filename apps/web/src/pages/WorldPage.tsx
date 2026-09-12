@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCharacter } from '../contexts/CharacterContext';
-import { Coins, Dumbbell, Brain, Eye, Loader2, Flame, Shield, Sword, Skull, Terminal, Book, Heart, User } from 'lucide-react';
+import { Coins, Dumbbell, Brain, Eye, Loader2, Shield, Sword, Skull, Book, Heart, User, Briefcase } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // ─────────────────────────────────────────────
@@ -49,17 +49,17 @@ const PINS = [
   },
   {
     id: 'library',
-    label: 'Grand Library',
-    sublabel: 'CODING',
-    description: 'Master the arcana of code and algorithms. Coding quests boost your intelligence.',
+    label: 'Spire of Craft',
+    sublabel: 'WORK & CAREER',
+    description: 'Forge professional excellence and strategic execution. High-impact work quests sharpen your intellect.',
     type: 'attribute' as const,
     attribute: 'intelligence',
     x: 34, y: 62,
-    icon: Terminal,
-    accent: '#a78bfa', // purple
-    glowClass: 'shadow-[0_0_30px_4px_rgba(167,139,250,0.35)]',
+    icon: Briefcase,
+    accent: '#818cf8', // indigo
+    glowClass: 'shadow-[0_0_30px_4px_rgba(129,140,248,0.35)]',
     route: '/quests',
-    categoryFilter: 'Coding',
+    categoryFilter: 'Work',
   },
   {
     id: 'archives',
@@ -131,14 +131,8 @@ const PINS = [
 ];
 
 // ─────────────────────────────────────────────
-// HUD Stat Card
+// Map pin navigation target helper
 // ─────────────────────────────────────────────
-const HudStat: React.FC<{ label: string; value: string | number; accent: string }> = ({ label, value, accent }) => (
-  <div className="flex flex-col items-center px-4 py-2 rounded-xl border border-white/10 bg-black/30 backdrop-blur-md">
-    <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">{label}</span>
-    <span className="text-lg font-bold" style={{ color: accent }}>{value}</span>
-  </div>
-);
 
 const getPinTargetUrl = (pin: typeof PINS[0]) => {
   if (pin.categoryFilter) {
@@ -213,7 +207,7 @@ const PinPanel: React.FC<{
 
   return (
     <div
-      className="absolute z-30 w-72 pointer-events-auto"
+      className="absolute z-30 w-[280px] sm:w-72 max-w-[90vw] pointer-events-auto"
       style={{
         left: `${Math.min(pin.x + 5, 65)}%`,
         top: `${Math.max(pin.y - 5, 8)}%`,
@@ -319,37 +313,7 @@ const WorldPage = () => {
       {/* Darkening vignette at bottom for HUD readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/40 pointer-events-none" />
 
-      {/* ── Top HUD ── */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 pointer-events-auto">
-        <HudStat label="Level" value={character?.level ?? 1} accent="#f59e0b" />
-        <div className="flex flex-col items-center px-4 py-2 rounded-xl border border-white/10 bg-black/30 backdrop-blur-md min-w-[140px]">
-          <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-1">XP</span>
-          <div className="w-full h-1.5 bg-slate-900/60 rounded-full overflow-hidden mb-1">
-            <div
-              className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-1000"
-              style={{ width: `${xpPercent}%` }}
-            />
-          </div>
-          <span className="text-[10px] text-blue-400 font-semibold">{currentLevelXp} / {xpRequired}</span>
-        </div>
-        <HudStat label="Gold" value={character?.gold ?? 0} accent="#facc15" />
-        {(character?.streakDays ?? 0) > 0 && (
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border bg-black/30 backdrop-blur-md ${
-            (character?.streakDays ?? 0) >= 3 ? 'border-orange-500/40' : 'border-white/10'
-          }`}>
-            <Flame className={`w-4 h-4 ${(character?.streakDays ?? 0) >= 3 ? 'text-orange-400' : 'text-slate-500'}`} />
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Streak</span>
-              <span className="text-sm font-bold text-orange-400">{character?.streakDays}d</span>
-            </div>
-            {streakMultiplier > 1 && (
-              <span className="text-xs font-bold text-orange-300 bg-orange-500/20 px-1.5 py-0.5 rounded-md">
-                {streakMultiplier}×
-              </span>
-            )}
-          </div>
-        )}
-      </div>
+
 
       {/* ── Dismiss overlay when panel is open ── */}
       {selectedPin && (
@@ -456,35 +420,39 @@ const WorldPage = () => {
         })}
       </div>
 
-      {/* ── Day Counter bottom-left ── */}
-      <div className="absolute bottom-6 left-6 z-20 flex items-center gap-3 pointer-events-none">
-        <div className="px-4 py-2 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md">
-          <span className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Day</span>
-          <div className="text-2xl font-bold text-white">
-            {character?.streakDays ?? 0}
+      {/* ── Bottom HUD ── */}
+      <div className="absolute bottom-6 left-0 right-0 z-20 px-4 sm:px-6 flex flex-col-reverse sm:flex-row justify-between items-center sm:items-end gap-6 pointer-events-none">
+        
+        {/* Day Counter */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left pointer-events-none">
+          <div className="px-4 py-2 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md">
+            <span className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Day</span>
+            <div className="text-2xl font-bold text-white">
+              {character?.streakDays ?? 0}
+            </div>
           </div>
+          {streakLabel && (
+            <p className="text-xs text-slate-400 italic max-w-[160px] leading-relaxed hidden sm:block">
+              "{streakMultiplier > 1 ? 'Consistency builds legends.' : 'A small step today builds a greater tomorrow.'}"
+            </p>
+          )}
         </div>
-        {streakLabel && (
-          <p className="text-xs text-slate-400 italic max-w-[160px] leading-relaxed">
-            "{streakMultiplier > 1 ? 'Consistency builds legends.' : 'A small step today builds a greater tomorrow.'}"
-          </p>
-        )}
-      </div>
 
-      {/* ── Quick nav bottom-right ── */}
-      <div className="absolute bottom-6 right-6 z-20 flex items-center gap-3 pointer-events-auto">
-        <button
-          onClick={() => navigate('/quests')}
-          className="px-5 py-2.5 rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-400 font-bold text-sm hover:bg-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95 backdrop-blur-md flex items-center gap-2"
-        >
-          <Sword className="w-4 h-4" /> Quest Log
-        </button>
-        <button
-          onClick={() => navigate('/bosses')}
-          className="px-5 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-400 font-bold text-sm hover:bg-rose-500/25 transition-all duration-200 hover:scale-105 active:scale-95 backdrop-blur-md flex items-center gap-2"
-        >
-          <Skull className="w-4 h-4" /> Boss Arena
-        </button>
+        {/* Quick nav */}
+        <div className="flex flex-wrap justify-center sm:justify-end items-center gap-3 pointer-events-auto">
+          <button
+            onClick={() => navigate('/quests')}
+            className="px-5 py-2.5 rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-400 font-bold text-sm hover:bg-amber-500/25 transition-all duration-200 hover:scale-105 active:scale-95 backdrop-blur-md flex items-center gap-2"
+          >
+            <Sword className="w-4 h-4" /> Quest Log
+          </button>
+          <button
+            onClick={() => navigate('/bosses')}
+            className="px-5 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/15 text-rose-400 font-bold text-sm hover:bg-rose-500/25 transition-all duration-200 hover:scale-105 active:scale-95 backdrop-blur-md flex items-center gap-2"
+          >
+            <Skull className="w-4 h-4" /> Boss Arena
+          </button>
+        </div>
       </div>
     </div>
   );

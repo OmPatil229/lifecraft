@@ -4,7 +4,7 @@ export interface IQuest extends Document {
   userId: mongoose.Types.ObjectId;
   title: string;
   description?: string;
-  category: 'Coding' | 'Studying' | 'Fitness' | 'Reading' | 'Meditation' | 'Health' | 'Personal';
+  category: 'Work' | 'Coding' | 'Studying' | 'Fitness' | 'Reading' | 'Meditation' | 'Health' | 'Personal';
   difficulty: 'Easy' | 'Medium' | 'Hard' | 'Epic';
   status: 'active' | 'completed' | 'failed';
   dueDate?: Date;
@@ -20,7 +20,7 @@ const QuestSchema = new Schema<IQuest>(
     description: { type: String, trim: true },
     category: {
       type: String,
-      enum: ['Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal'],
+      enum: ['Work', 'Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal'],
       default: 'Personal',
       required: true,
     },

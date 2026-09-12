@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Compass, Sparkles, Coins, Flame } from 'lucide-react';
+import { Compass, Sparkles, Coins, Flame, LogOut, Menu, X } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CharacterProvider, useCharacter } from './contexts/CharacterContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -17,11 +17,12 @@ import { useState } from 'react';
 import { StreakHeatmap } from './components/StreakHeatmap';
 
 const Navigation = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { character, xpPercent, currentLevelXp, xpRequired } = useCharacter();
   const streak = character?.streakDays ?? 0;
   const location = useLocation();
   const [showStreakModal, setShowStreakModal] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLink = (to: string, label: string, activeStyle: string) => {
     const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
@@ -52,15 +53,15 @@ const Navigation = () => {
         {user ? (
           <>
             {/* Center nav links */}
-            <div className="flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
               {navLink('/world', '🗺 World', 'text-amber-400 bg-amber-500/10')}
               {navLink('/quests', '⚔️ Quests', 'text-blue-400 bg-blue-500/10')}
               {navLink('/bosses', '👹 Bosses', 'text-rose-400 bg-rose-500/10')}
             </div>
 
             {/* Right: stats + avatar */}
-            <div className="flex items-center gap-3 flex-shrink-0">
-              {/* GitHub Streak Maintainer Trigger Button */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* Daily Momentum Trigger Button */}
               <button
                 onClick={() => setShowStreakModal(true)}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer border ${
@@ -68,7 +69,7 @@ const Navigation = () => {
                     ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/15 border-orange-500/40 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.2)]'
                     : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
                 }`}
-                title="Click to view GitHub-Style Streak Heatmap"
+                title="Click to view Daily Momentum Heatmap"
               >
                 <Flame className={`w-3.5 h-3.5 ${streak >= 3 ? 'text-orange-400 animate-pulse' : 'text-slate-400'}`} />
                 <span>{streak}d Streak</span>
@@ -106,6 +107,23 @@ const Navigation = () => {
               >
                 {user.displayName?.[0]?.toUpperCase() ?? '?'}
               </Link>
+
+              {/* Log Out Button */}
+              <button
+                onClick={() => logout()}
+                className="hidden md:block p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all ml-1"
+                title="Log Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white transition-all ml-1"
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             </div>
           </>
         ) : (
@@ -117,6 +135,39 @@ const Navigation = () => {
           </div>
         )}
       </nav>
+
+      {/* Mobile Menu Dropdown */}
+      {user && isMobileMenuOpen && (
+        <div className="md:hidden fixed top-16 left-0 right-0 bg-slate-950/95 border-b border-white/5 backdrop-blur-xl z-40 px-4 py-4 flex flex-col gap-4 animate-in slide-in-from-top-2">
+          <div className="flex flex-col gap-2" onClick={() => setIsMobileMenuOpen(false)}>
+            {navLink('/world', '🗺 World', 'text-amber-400 bg-amber-500/10')}
+            {navLink('/quests', '⚔️ Quests', 'text-blue-400 bg-blue-500/10')}
+            {navLink('/bosses', '👹 Bosses', 'text-rose-400 bg-rose-500/10')}
+          </div>
+          <div className="h-px bg-white/10 w-full" />
+          <div className="flex flex-col gap-3 px-2">
+            <div className="flex items-center gap-3">
+               <Coins className="w-4 h-4 text-yellow-400" />
+               <span className="text-sm font-bold text-yellow-400">{character?.gold ?? 0} Gold</span>
+            </div>
+            <div className="flex items-center gap-3">
+               <Sparkles className="w-4 h-4 text-blue-400" />
+               <span className="text-sm font-bold text-blue-400">Lv {character?.level ?? 1} ({currentLevelXp}/{xpRequired} XP)</span>
+            </div>
+          </div>
+          <div className="h-px bg-white/10 w-full" />
+          <button
+            onClick={() => {
+              setIsMobileMenuOpen(false);
+              logout();
+            }}
+            className="flex items-center gap-2 text-rose-400 py-2 font-semibold hover:bg-rose-500/10 rounded-lg px-2 w-full text-left"
+          >
+            <LogOut className="w-4 h-4" />
+            Log Out
+          </button>
+        </div>
+      )}
 
       {/* GitHub Streak Heatmap Modal */}
       {showStreakModal && (

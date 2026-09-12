@@ -4,7 +4,7 @@ export interface IBoss extends Document {
   userId: mongoose.Types.ObjectId;
   title: string;
   description?: string;
-  category: 'Coding' | 'Studying' | 'Fitness' | 'Reading' | 'Meditation' | 'Health' | 'Personal';
+  category: 'Work' | 'Coding' | 'Studying' | 'Fitness' | 'Reading' | 'Meditation' | 'Health' | 'Personal';
   maxHp: number;
   currentHp: number;
   status: 'alive' | 'defeated';
@@ -24,11 +24,11 @@ const BossSchema = new Schema<IBoss>(
     description: { type: String, trim: true },
     category: {
       type: String,
-      enum: ['Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal'],
+      enum: ['Work', 'Coding', 'Studying', 'Fitness', 'Reading', 'Meditation', 'Health', 'Personal'],
       required: true,
       default: 'Personal',
     },
-    maxHp: { type: Number, required: true, min: 1 },
+    maxHp: { type: Number, required: true, min: 10, max: 2000, default: 100 },
     currentHp: { type: Number, required: true },
     status: {
       type: String,
@@ -37,8 +37,8 @@ const BossSchema = new Schema<IBoss>(
       required: true,
     },
     reward: {
-      xp: { type: Number, required: true, default: 500 },
-      gold: { type: Number, required: true, default: 200 },
+      xp: { type: Number, required: true, default: 500, min: 50, max: 5000 },
+      gold: { type: Number, required: true, default: 200, min: 10, max: 2000 },
     },
     defeatedAt: { type: Date },
   },

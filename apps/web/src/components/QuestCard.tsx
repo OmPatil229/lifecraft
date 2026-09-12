@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Sword, Terminal, BookOpen, Dumbbell, Book, Brain, Heart, User, CheckCircle2, Sparkles, Coins, Zap } from 'lucide-react';
+import { Calendar, Sword, Terminal, BookOpen, Dumbbell, Book, Brain, Heart, User, CheckCircle2, Sparkles, Coins, Zap, Briefcase } from 'lucide-react';
 
 export interface Quest {
   _id: string;
@@ -29,6 +29,7 @@ const DIFFICULTY_CONFIG: Record<string, { label: string; color: string; bg: stri
 };
 
 const CATEGORY_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string; border: string; glow: string }> = {
+  Work:       { icon: Briefcase, color: 'text-indigo-400', bg: 'bg-indigo-400/10', border: 'border-indigo-400/20', glow: 'rgba(129,140,248,0.15)' },
   Coding:     { icon: Terminal,  color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20', glow: 'rgba(167,139,250,0.15)' },
   Studying:   { icon: Brain,     color: 'text-blue-400',   bg: 'bg-blue-400/10',   border: 'border-blue-400/20',   glow: 'rgba(96,165,250,0.15)'  },
   Fitness:    { icon: Dumbbell,  color: 'text-red-400',    bg: 'bg-red-400/10',    border: 'border-red-400/20',    glow: 'rgba(248,113,113,0.15)' },

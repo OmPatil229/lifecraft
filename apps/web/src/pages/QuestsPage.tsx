@@ -3,7 +3,7 @@ import { apiFetch } from '../lib/api';
 import { type Quest, QuestCard } from '../components/QuestCard';
 import {
   Plus, Loader2, Sparkles, Coins, Sword,
-  Flame, Star, X, Terminal, Brain, Dumbbell, BookOpen, Book, Heart, User
+  Flame, Star, X, Brain, Dumbbell, BookOpen, Book, Heart, User, Briefcase
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { useCharacter } from '../contexts/CharacterContext';
@@ -13,7 +13,7 @@ import { StreakHeatmap } from '../components/StreakHeatmap';
 // ── Category filter config ───────────────────
 const CATEGORIES = [
   { label: 'All', value: '', icon: Star },
-  { label: 'Coding', value: 'Coding', icon: Terminal },
+  { label: 'Work', value: 'Work', icon: Briefcase },
   { label: 'Studying', value: 'Studying', icon: Brain },
   { label: 'Fitness', value: 'Fitness', icon: Dumbbell },
   { label: 'Reading', value: 'Reading', icon: Book },
@@ -364,7 +364,7 @@ const QuestsPage = () => {
       {questModal && <CreateQuestModal onClose={() => setQuestModal(false)} onCreate={q => setQuests(p => [q, ...p])} />}
 
       {/* ── Header ── */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
         <div>
           <h1 className="text-4xl font-black text-white mb-1" style={{
             background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
@@ -445,7 +445,7 @@ const QuestsPage = () => {
         </div>
 
         {/* Difficulty chips */}
-        <div className="flex gap-1.5 ml-auto">
+        <div className="flex gap-1.5 flex-wrap sm:ml-auto">
           {DIFFICULTIES.map(d => (
             <button
               key={d}

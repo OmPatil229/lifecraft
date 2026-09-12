@@ -115,7 +115,7 @@ export const StreakHeatmap: React.FC<StreakHeatmapProps> = ({ compact = false })
               )}
             </div>
             <p className="text-xs text-slate-400 font-medium mt-0.5">
-              GitHub-style Streak Maintainer • Daily activity matrix
+              Consistency Matrix • Daily Performance Momentum
             </p>
           </div>
         </div>

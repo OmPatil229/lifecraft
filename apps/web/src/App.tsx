@@ -6,6 +6,8 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import WorldPage from './pages/WorldPage';
+import QuestsPage from './pages/QuestsPage';
+import QuestDetailPage from './pages/QuestDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 import './App.css';
 
@@ -50,6 +52,8 @@ function App() {
               
               {/* Protected Routes */}
               <Route path="/world" element={<ProtectedRoute><WorldPage /></ProtectedRoute>} />
+              <Route path="/quests" element={<ProtectedRoute><QuestsPage /></ProtectedRoute>} />
+              <Route path="/quests/:id" element={<ProtectedRoute><QuestDetailPage /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

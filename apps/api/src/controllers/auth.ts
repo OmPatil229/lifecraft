@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { User } from '../models/User';
+import { Character } from '../models/Character';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
@@ -36,6 +37,11 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
     
     await user.save();
+
+    const character = new Character({
+      userId: user._id,
+    });
+    await character.save();
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
     

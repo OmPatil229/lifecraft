@@ -4,6 +4,8 @@ import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
+import questsRoutes from './routes/quests';
+import characterRoutes from './routes/character';
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/quests', questsRoutes);
+app.use('/api/character', characterRoutes);
 
 app.get('/', (req, res) => {
   res.send('LIFECRAFT API running');

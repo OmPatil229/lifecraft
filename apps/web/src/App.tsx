@@ -13,11 +13,15 @@ import BossesPage from './pages/BossesPage';
 import NotFoundPage from './pages/NotFoundPage';
 import './App.css';
 
+import { useState } from 'react';
+import { StreakHeatmap } from './components/StreakHeatmap';
+
 const Navigation = () => {
   const { user } = useAuth();
-  const { character, xpPercent, currentLevelXp, xpRequired, streakLabel } = useCharacter();
+  const { character, xpPercent, currentLevelXp, xpRequired } = useCharacter();
   const streak = character?.streakDays ?? 0;
   const location = useLocation();
+  const [showStreakModal, setShowStreakModal] = useState(false);
 
   const navLink = (to: string, label: string, activeStyle: string) => {
     const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
@@ -37,78 +41,98 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl px-6 py-0 flex justify-between items-center h-16">
-      {/* Logo */}
-      <Link to={user ? '/world' : '/'} className="flex items-center gap-2 group flex-shrink-0">
-        <Compass className="w-5 h-5 text-amber-500 group-hover:rotate-45 transition-transform duration-500" />
-        <span className="text-base font-black tracking-[0.15em] text-white">LIFECRAFT</span>
-      </Link>
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl px-6 py-0 flex justify-between items-center h-16">
+        {/* Logo */}
+        <Link to={user ? '/world' : '/'} className="flex items-center gap-2 group flex-shrink-0">
+          <Compass className="w-5 h-5 text-amber-500 group-hover:rotate-45 transition-transform duration-500" />
+          <span className="text-base font-black tracking-[0.15em] text-white">LIFECRAFT</span>
+        </Link>
 
-      {user ? (
-        <>
-          {/* Center nav links */}
-          <div className="flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-            {navLink('/world', '🗺 World', 'text-amber-400 bg-amber-500/10')}
-            {navLink('/quests', '⚔️ Quests', 'text-blue-400 bg-blue-500/10')}
-            {navLink('/bosses', '👹 Bosses', 'text-rose-400 bg-rose-500/10')}
-          </div>
-
-          {/* Right: stats + avatar */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            {/* Streak */}
-            {streak >= 3 && (
-              <div
-                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20 text-xs font-bold text-orange-400"
-                title={streakLabel}
-              >
-                <Flame className="w-3.5 h-3.5" />
-                {streak}d
-              </div>
-            )}
-
-            {/* Gold */}
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs font-bold text-yellow-400">
-              <Coins className="w-3.5 h-3.5" />
-              {character?.gold ?? 0}
+        {user ? (
+          <>
+            {/* Center nav links */}
+            <div className="flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+              {navLink('/world', '🗺 World', 'text-amber-400 bg-amber-500/10')}
+              {navLink('/quests', '⚔️ Quests', 'text-blue-400 bg-blue-500/10')}
+              {navLink('/bosses', '👹 Bosses', 'text-rose-400 bg-rose-500/10')}
             </div>
 
-            {/* XP bar */}
-            <div className="hidden md:flex items-center gap-2 min-w-[140px]">
-              <span className="text-xs font-bold text-amber-400 whitespace-nowrap">Lv {character?.level ?? 1}</span>
-              <div
-                className="relative flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50"
-                title={`${currentLevelXp} / ${xpRequired} XP`}
+            {/* Right: stats + avatar */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {/* GitHub Streak Maintainer Trigger Button */}
+              <button
+                onClick={() => setShowStreakModal(true)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer border ${
+                  streak >= 3
+                    ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/15 border-orange-500/40 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.2)]'
+                    : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                }`}
+                title="Click to view GitHub-Style Streak Heatmap"
               >
+                <Flame className={`w-3.5 h-3.5 ${streak >= 3 ? 'text-orange-400 animate-pulse' : 'text-slate-400'}`} />
+                <span>{streak}d Streak</span>
+              </button>
+
+              {/* Gold */}
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-xs font-bold text-yellow-400">
+                <Coins className="w-3.5 h-3.5" />
+                {character?.gold ?? 0}
+              </div>
+
+              {/* XP bar */}
+              <div className="hidden md:flex items-center gap-2 min-w-[140px]">
+                <span className="text-xs font-bold text-amber-400 whitespace-nowrap">Lv {character?.level ?? 1}</span>
                 <div
-                  className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-700"
-                  style={{ width: `${xpPercent}%` }}
-                />
+                  className="relative flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50"
+                  title={`${currentLevelXp} / ${xpRequired} XP`}
+                >
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full transition-all duration-700"
+                    style={{ width: `${xpPercent}%` }}
+                  />
+                </div>
+                <div className="flex items-center gap-0.5 text-[10px] text-slate-500 whitespace-nowrap">
+                  <Sparkles className="w-2.5 h-2.5 text-blue-400" />
+                  {currentLevelXp}
+                </div>
               </div>
-              <div className="flex items-center gap-0.5 text-[10px] text-slate-500 whitespace-nowrap">
-                <Sparkles className="w-2.5 h-2.5 text-blue-400" />
-                {currentLevelXp}
-              </div>
-            </div>
 
-            {/* Avatar */}
-            <Link
-              to="/world"
-              className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-sm font-black text-slate-950 hover:scale-110 transition-transform"
-              title={user.displayName}
-            >
-              {user.displayName?.[0]?.toUpperCase() ?? '?'}
+              {/* Avatar */}
+              <Link
+                to="/world"
+                className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-sm font-black text-slate-950 hover:scale-110 transition-transform"
+                title={user.displayName}
+              >
+                {user.displayName?.[0]?.toUpperCase() ?? '?'}
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="flex gap-3">
+            <Link to="/login" className="glass-button py-1.5 text-sm">Log In</Link>
+            <Link to="/signup" className="glass-button py-1.5 text-sm border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20">
+              Start Journey
             </Link>
           </div>
-        </>
-      ) : (
-        <div className="flex gap-3">
-          <Link to="/login" className="glass-button py-1.5 text-sm">Log In</Link>
-          <Link to="/signup" className="glass-button py-1.5 text-sm border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20">
-            Start Journey
-          </Link>
+        )}
+      </nav>
+
+      {/* GitHub Streak Heatmap Modal */}
+      {showStreakModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-3xl">
+            <button
+              onClick={() => setShowStreakModal(false)}
+              className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-slate-800 border border-slate-600 text-slate-300 flex items-center justify-center hover:bg-slate-700 text-lg font-bold shadow-lg"
+            >
+              ×
+            </button>
+            <StreakHeatmap />
+          </div>
         </div>
       )}
-    </nav>
+    </>
   );
 };
 

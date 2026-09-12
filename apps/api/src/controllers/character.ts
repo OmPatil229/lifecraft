@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Character } from '../models/Character';
+import { Quest } from '../models/Quest';
 
 export const getCharacter = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -14,6 +15,35 @@ export const getCharacter = async (req: Request, res: Response): Promise<void> =
     res.status(200).json(character);
   } catch (error) {
     console.error('Error fetching character:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getActivity = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 120); // Past 120 days for heatmap grid
+
+    const completedQuests = await Quest.find({
+      userId: req.userId,
+      status: 'completed',
+      completedAt: { $gte: startDate }
+    });
+
+    const activityMap: Record<string, number> = {};
+    completedQuests.forEach(quest => {
+      if (quest.completedAt) {
+        const dateStr = new Date(quest.completedAt).toISOString().split('T')[0];
+        activityMap[dateStr] = (activityMap[dateStr] || 0) + 1;
+      }
+    });
+
+    res.status(200).json({
+      activity: activityMap,
+      totalCompleted: completedQuests.length
+    });
+  } catch (error) {
+    console.error('Error fetching activity history:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -8,6 +8,8 @@ import {
 import { useSearchParams } from 'react-router-dom';
 import { useCharacter } from '../contexts/CharacterContext';
 
+import { StreakHeatmap } from '../components/StreakHeatmap';
+
 // ── Category filter config ───────────────────
 const CATEGORIES = [
   { label: 'All', value: '', icon: Star },
@@ -362,7 +364,7 @@ const QuestsPage = () => {
       {questModal && <CreateQuestModal onClose={() => setQuestModal(false)} onCreate={q => setQuests(p => [q, ...p])} />}
 
       {/* ── Header ── */}
-      <div className="flex justify-between items-start mb-8">
+      <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-4xl font-black text-white mb-1" style={{
             background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
@@ -370,11 +372,11 @@ const QuestsPage = () => {
           }}>
             Quest Log
           </h1>
-          <p className="text-slate-400 text-sm">Complete objectives to earn XP and Gold.</p>
+          <p className="text-slate-400 text-sm">Complete real-world objectives to earn XP and Gold.</p>
         </div>
         <button
           onClick={() => setQuestModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 hover:scale-105 active:scale-95"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
           style={{
             background: 'linear-gradient(135deg, rgba(245,158,11,0.25), rgba(245,158,11,0.1))',
             border: '1px solid rgba(245,158,11,0.4)',
@@ -383,8 +385,13 @@ const QuestsPage = () => {
           }}
         >
           <Plus className="w-4 h-4" />
-          New Quest
+          Forge Quest
         </button>
+      </div>
+
+      {/* ── GitHub-Style Streak Maintainer Heatmap ── */}
+      <div className="mb-8">
+        <StreakHeatmap />
       </div>
 
       {/* ── Tabs ── */}

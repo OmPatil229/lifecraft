@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await apiFetch('/auth/me');
       setUser(data.user);
     } catch (err) {
+      localStorage.removeItem('lifecraft_token');
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -49,6 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'POST',
         body: JSON.stringify(credentials),
       });
+      if (data.token) {
+        localStorage.setItem('lifecraft_token', data.token);
+      }
       setUser(data.user);
     } catch (err: any) {
       setError(err.message);
@@ -66,6 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'POST',
         body: JSON.stringify(userData),
       });
+      if (data.token) {
+        localStorage.setItem('lifecraft_token', data.token);
+      }
       setUser(data.user);
     } catch (err: any) {
       setError(err.message);
@@ -79,10 +86,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await apiFetch('/auth/logout', { method: 'POST' });
-      setUser(null);
     } catch (err) {
       console.error('Logout failed', err);
     } finally {
+      localStorage.removeItem('lifecraft_token');
+      setUser(null);
       setIsLoading(false);
     }
   };

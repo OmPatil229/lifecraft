@@ -8,6 +8,11 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     headers.set('Content-Type', 'application/json');
   }
 
+  const token = localStorage.getItem('lifecraft_token');
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
   const response = await fetch(url, {
     ...options,
     headers,

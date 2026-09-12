@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { useCharacter } from '../contexts/CharacterContext';
-import { Coins, Dumbbell, Brain, Leaf, Eye, Loader2, Flame, Shield, Sword, Skull } from 'lucide-react';
+import { Coins, Dumbbell, Brain, Eye, Loader2, Flame, Shield, Sword, Skull, Terminal, Book, Heart, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // ─────────────────────────────────────────────
-// Map pin definitions – each pin maps to a
-// screen-percentage coordinate on the bg image.
+// Map pin definitions – aligned 1-to-1 with Quest categories
 // ─────────────────────────────────────────────
 const PINS = [
   {
     id: 'castle',
     label: 'The Castle',
-    sublabel: 'Your HQ',
-    description: 'The seat of your power. Level up to unlock new abilities.',
+    sublabel: 'YOUR HQ',
+    description: 'The seat of your power. Level up to unlock new abilities and track overall progression.',
     type: 'level' as const,
     x: 49,  y: 15,
     icon: Shield,
@@ -23,36 +22,64 @@ const PINS = [
   {
     id: 'observatory',
     label: 'Observatory',
-    sublabel: 'Focus',
-    description: 'Train your concentration here. Complete Meditation quests to power this up.',
+    sublabel: 'MEDITATION',
+    description: 'Train your concentration and mind. Complete Meditation quests to clear your thoughts.',
     type: 'attribute' as const,
     attribute: 'focus',
     x: 83, y: 22,
     icon: Eye,
-    accent: '#34d399', // emerald
-    glowClass: 'shadow-[0_0_30px_4px_rgba(52,211,153,0.35)]',
+    accent: '#22d3ee', // cyan
+    glowClass: 'shadow-[0_0_30px_4px_rgba(34,211,238,0.35)]',
     route: '/quests',
     categoryFilter: 'Meditation',
   },
   {
     id: 'forest',
     label: 'Ancient Forest',
-    sublabel: 'Wisdom',
-    description: 'Ancient trees hold deep knowledge. Study quests strengthen wisdom.',
+    sublabel: 'STUDYING',
+    description: 'Ancient trees hold deep wisdom. Study quests strengthen knowledge and wisdom.',
     type: 'attribute' as const,
     attribute: 'wisdom',
     x: 15, y: 40,
-    icon: Leaf,
-    accent: '#4ade80', // green
-    glowClass: 'shadow-[0_0_30px_4px_rgba(74,222,128,0.35)]',
+    icon: Brain,
+    accent: '#60a5fa', // blue
+    glowClass: 'shadow-[0_0_30px_4px_rgba(96,165,250,0.35)]',
     route: '/quests',
     categoryFilter: 'Studying',
   },
   {
+    id: 'library',
+    label: 'Grand Library',
+    sublabel: 'CODING',
+    description: 'Master the arcana of code and algorithms. Coding quests boost your intelligence.',
+    type: 'attribute' as const,
+    attribute: 'intelligence',
+    x: 34, y: 62,
+    icon: Terminal,
+    accent: '#a78bfa', // purple
+    glowClass: 'shadow-[0_0_30px_4px_rgba(167,139,250,0.35)]',
+    route: '/quests',
+    categoryFilter: 'Coding',
+  },
+  {
+    id: 'archives',
+    label: 'Grand Archives',
+    sublabel: 'READING',
+    description: 'Tomes of ancient lore and modern knowledge. Reading quests expand your mind.',
+    type: 'attribute' as const,
+    attribute: 'intelligence',
+    x: 62, y: 36,
+    icon: Book,
+    accent: '#34d399', // emerald
+    glowClass: 'shadow-[0_0_30px_4px_rgba(52,211,153,0.35)]',
+    route: '/quests',
+    categoryFilter: 'Reading',
+  },
+  {
     id: 'training',
     label: 'Training Grounds',
-    sublabel: 'Strength',
-    description: 'Forge your body into a weapon. Fitness quests build strength.',
+    sublabel: 'FITNESS',
+    description: 'Forge your body into a weapon. Fitness and physical training build strength.',
     type: 'attribute' as const,
     attribute: 'strength',
     x: 74, y: 54,
@@ -63,36 +90,37 @@ const PINS = [
     categoryFilter: 'Fitness',
   },
   {
-    id: 'library',
-    label: 'Grand Library',
-    sublabel: 'Intelligence',
-    description: 'Knowledge is power. Coding & Reading quests boost intelligence.',
+    id: 'springs',
+    label: 'Healing Springs',
+    sublabel: 'HEALTH',
+    description: 'Nourish your physical well-being. Health habits refresh your vitality.',
     type: 'attribute' as const,
-    attribute: 'intelligence',
-    x: 34, y: 62,
-    icon: Brain,
-    accent: '#a78bfa', // purple
-    glowClass: 'shadow-[0_0_30px_4px_rgba(167,139,250,0.35)]',
+    attribute: 'vitality',
+    x: 42, y: 45,
+    icon: Heart,
+    accent: '#f472b6', // pink
+    glowClass: 'shadow-[0_0_30px_4px_rgba(244,114,182,0.35)]',
     route: '/quests',
-    categoryFilter: 'Coding',
+    categoryFilter: 'Health',
   },
   {
     id: 'marketplace',
     label: 'Marketplace',
-    sublabel: 'Treasury',
-    description: 'The lifeblood of your kingdom. Earn Gold by completing quests.',
+    sublabel: 'PERSONAL',
+    description: 'The hub of daily routines. Personal goals & errands earn Gold for your treasury.',
     type: 'gold' as const,
     x: 53, y: 82,
-    icon: Coins,
+    icon: User,
     accent: '#facc15', // yellow
     glowClass: 'shadow-[0_0_30px_4px_rgba(250,204,21,0.35)]',
     route: '/quests',
+    categoryFilter: 'Personal',
   },
   {
     id: 'boss-arena',
     label: 'Boss Arena',
-    sublabel: 'Battles',
-    description: 'Challenge epic foes. Defeat bosses for legendary rewards.',
+    sublabel: 'BATTLES',
+    description: 'Challenge epic boss encounters. Defeat bosses for legendary rewards.',
     type: 'boss' as const,
     x: 25, y: 78,
     icon: Skull,

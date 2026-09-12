@@ -30,10 +30,13 @@ app.get('/', (req, res) => {
   res.send('LIFECRAFT API running');
 });
 
+let isConnected = false;
 const connectDB = async () => {
+  if (isConnected) return;
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/lifecraft';
     await mongoose.connect(mongoUri);
+    isConnected = true;
     console.log('MongoDB connected');
   } catch (error) {
     console.warn('Failed to connect to primary MongoDB, falling back to in-memory database...', error);
@@ -42,6 +45,7 @@ const connectDB = async () => {
       const mongoServer = await MongoMemoryServer.create();
       const uri = mongoServer.getUri();
       await mongoose.connect(uri);
+      isConnected = true;
       console.log(`Connected to in-memory MongoDB at ${uri}`);
     } catch (memError) {
       console.error('Failed to start in-memory MongoDB:', memError);
@@ -50,8 +54,17 @@ const connectDB = async () => {
   }
 };
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+// Vercel serverless functions shouldn't use app.listen().
+// They instead require the Express app to be exported.
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server listening on port ${PORT}`);
+    });
   });
-});
+} else {
+  // Connect to the database globally for Vercel
+  connectDB();
+}
+
+export default app;

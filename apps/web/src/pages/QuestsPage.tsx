@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
 import { Quest, QuestCard } from '../components/QuestCard';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Sparkles, Coins, ArrowUpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const QuestsPage = () => {
   const [quests, setQuests] = useState<Quest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [rewardToast, setRewardToast] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,10 +29,23 @@ const QuestsPage = () => {
     try {
       // Optimistic update
       setQuests(q => q.map(quest => quest._id === id ? { ...quest, status: 'completed' } : quest));
-      await apiFetch(`/quests/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'completed', completedAt: new Date().toISOString() }),
+      
+      const response = await apiFetch(`/quests/${id}/complete`, {
+        method: 'POST',
       });
+      
+      // Show reward toast
+      setRewardToast({
+        xp: response.reward.xp,
+        gold: response.reward.gold,
+        levelUp: response.levelUp,
+        newLevel: response.newLevel
+      });
+      
+      setTimeout(() => {
+        setRewardToast(null);
+      }, 5000);
+      
     } catch (error) {
       // Revert on failure
       fetchQuests();
@@ -39,7 +53,31 @@ const QuestsPage = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto py-8">
+    <div className="w-full max-w-4xl mx-auto py-8 relative">
+      
+      {rewardToast && (
+        <div className="fixed top-24 right-8 z-50 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="glass-panel p-4 border-amber-500/50 shadow-[0_0_30px_-5px_rgba(245,158,11,0.3)]">
+            {rewardToast.levelUp && (
+              <div className="text-amber-400 font-bold text-lg mb-2 flex items-center gap-2">
+                <ArrowUpCircle className="w-5 h-5" />
+                Level Up! You reached Level {rewardToast.newLevel}!
+              </div>
+            )}
+            <div className="flex items-center gap-4 text-sm font-semibold">
+              <div className="flex items-center gap-1.5 text-blue-400">
+                <Sparkles className="w-4 h-4" />
+                +{rewardToast.xp} XP
+              </div>
+              <div className="flex items-center gap-1.5 text-yellow-400">
+                <Coins className="w-4 h-4" />
+                +{rewardToast.gold} Gold
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="fantasy-heading text-4xl mb-2 text-white">Your Quests</h1>

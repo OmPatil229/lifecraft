@@ -2,10 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../lib/api';
 import { type Quest, QuestCard } from '../components/QuestCard';
 import {
-  Plus, Loader2, Sparkles, Coins, ArrowUpCircle, Sword, CheckCircle2,
-  Flame, Zap, Trophy, Star, X, Terminal, Brain, Dumbbell, BookOpen, Book, Heart, User
+  Plus, Loader2, Sparkles, Coins, Sword,
+  Flame, Star, X, Terminal, Brain, Dumbbell, BookOpen, Book, Heart, User
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useCharacter } from '../contexts/CharacterContext';
 
 // ── Category filter config ───────────────────
@@ -292,7 +291,6 @@ const QuestsPage = () => {
   const [questModal, setQuestModal] = useState(false);
   const [completeModal, setCompleteModal] = useState<any>(null);
   const [levelUpModal, setLevelUpModal] = useState<number | null>(null);
-  const navigate = useNavigate();
   const { applyReward } = useCharacter();
 
   const fetchQuests = useCallback(async () => {
@@ -334,7 +332,6 @@ const QuestsPage = () => {
   };
 
   const handleLevelUpClose = () => {
-    const savedModal = levelUpModal;
     setLevelUpModal(null);
     // After closing level-up, show the regular reward modal if we have a pending one
     setCompleteModal((prev: any) => prev || null);

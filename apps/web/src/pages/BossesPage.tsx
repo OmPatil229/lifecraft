@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
-import { Plus, Loader2, Skull, Swords, Shield, Trash2, Trophy } from 'lucide-react';
-import { useCharacter } from '../contexts/CharacterContext';
+import { Loader2, Skull, Swords, Shield, Trash2, Trophy } from 'lucide-react';
 
 interface Boss {
   _id: string;

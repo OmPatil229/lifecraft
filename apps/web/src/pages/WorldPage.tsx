@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { useCharacter } from '../contexts/CharacterContext';
 import { Coins, Dumbbell, Brain, Leaf, Eye, Loader2, Flame, Shield, Sword, Skull } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

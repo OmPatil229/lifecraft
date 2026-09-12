@@ -22,7 +22,7 @@ export const getCharacter = async (req: Request, res: Response): Promise<void> =
 export const getActivity = async (req: Request, res: Response): Promise<void> => {
   try {
     const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 120); // Past 120 days for heatmap grid
+    startDate.setDate(startDate.getDate() - 365); // Past 365 days for 1-year heatmap grid
 
     const completedQuests = await Quest.find({
       userId: req.userId,

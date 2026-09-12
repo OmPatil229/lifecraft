@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Compass, Sparkles, Coins, Flame } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CharacterProvider, useCharacter } from './contexts/CharacterContext';
@@ -17,10 +17,10 @@ const Navigation = () => {
   const { user } = useAuth();
   const { character, xpPercent, currentLevelXp, xpRequired, streakLabel } = useCharacter();
   const streak = character?.streakDays ?? 0;
-  const location = window.location.pathname;
+  const location = useLocation();
 
   const navLink = (to: string, label: string, activeStyle: string) => {
-    const isActive = location === to || location.startsWith(to + '/');
+    const isActive = location.pathname === to || location.pathname.startsWith(to + '/');
     return (
       <Link
         to={to}
@@ -131,6 +131,8 @@ function App() {
                 {/* Protected Routes */}
                 <Route path="/world" element={<ProtectedRoute><WorldPage /></ProtectedRoute>} />
                 <Route path="/quests" element={<ProtectedRoute><QuestsPage /></ProtectedRoute>} />
+                {/* /quests/new is now handled as an inline modal; redirect to /quests */}
+                <Route path="/quests/new" element={<Navigate to="/quests" replace />} />
                 <Route path="/quests/:id" element={<ProtectedRoute><QuestDetailPage /></ProtectedRoute>} />
                 <Route path="/bosses" element={<ProtectedRoute><BossesPage /></ProtectedRoute>} />
 

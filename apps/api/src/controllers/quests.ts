@@ -162,7 +162,7 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Step 4: Calculate streak and XP multiplier
+    const oldStreakDays = character.streakDays; // snapshot before mutation
     const newStreak = calculateNewStreak(character.streakDays, character.lastActivityDate);
     const multiplier = getStreakMultiplier(newStreak);
     const baseXp = reward.xp;
@@ -212,8 +212,9 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
         // Grant boss defeat reward on top of quest reward
         character.totalXp += aliveBoss.reward.xp;
         character.gold += aliveBoss.reward.gold;
-        await character.save();
         bossDefeated = aliveBoss.toObject();
+        // Save the updated character (with boss bonus) before saving the boss
+        await character.save();
       }
       await aliveBoss.save();
     }
@@ -239,7 +240,7 @@ export const completeQuest = async (req: Request, res: Response): Promise<void> 
       streak: {
         days: newStreak,
         multiplier,
-        isNew: newStreak !== character.streakDays,
+        isNew: newStreak !== oldStreakDays,
       },
       levelUp: didLevelUp,
       newLevel: character.level,
